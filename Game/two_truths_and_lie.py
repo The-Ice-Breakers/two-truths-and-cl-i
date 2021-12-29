@@ -2,10 +2,10 @@ import random
 import time
 
 class Player:
-    def __init__(self, name="Player", client_id=None):
+    def __init__(self, name="Player", websocket=None):
         self.selection = None
         self.name = name
-        self.client_id = client_id
+        self.websocket = websocket
         self.statements={}
 
 class Game:
@@ -14,11 +14,11 @@ class Game:
         self.players = []
         self.playersGone=[]
 
-    def addPlayer(self):
-        name = input("Name: ")
-        player = Player(name)
+    def addPlayer(self, websocket, name):
+        player = Player(name, websocket)
         self.players.append(player)
         self.play()
+        return player
 
     def newRound(self):
         self.playersGone = []
@@ -26,6 +26,7 @@ class Game:
 
     def askStatement(self):
         for player in self.players:
+            player.statements= {}
             print("Enter 2 true facts and 1 lie")
             for _ in range(0, 2):
                 truth = input("Truth: ")
@@ -33,19 +34,21 @@ class Game:
             false = input("False: ")
             player.statements[false] = False
 
+
+
     def checkAnswer(self, statements, player, answer):
         if statements[answer] == False:
             print(player.name + " ✓")
         else: 
             print(player.name + " X")
 
-    def removePlayerById(self, id):
+    def removePlayerByWebSocket(self, websocket):
         for player in self.players:
-            if player.client_id == id:
+            if player.websocket == websocket:
                 self.players.remove(player)
     
     def play(self):
-        if len(self.players) >= 2:
+        if len(self.players) < 2:
             self.newRound()
             self.askStatement()
             while len(self.playersGone) != len(self.players):
@@ -76,9 +79,11 @@ class Game:
             print("New Round Starting...")
             self.play()
         else:
-            print("Not enough players")
+            self.play()
 
-game = Game()
-game.addPlayer()
-game.addPlayer()
-game.play()
+
+if __name__ == '__main__':
+    game = Game()
+    game.addPlayer()
+    game.addPlayer()
+    game.play()
