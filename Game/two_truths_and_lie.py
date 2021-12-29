@@ -48,14 +48,14 @@ class Game:
         for player in self.players:
             await player.websocket.send_text("Enter 2 true facts and 1 lie")
             player.statements= {}
-            for _ in range(0, 1):
-                await player.websocket.send_text("Enter a truth:")
-                truth = await player.websocket.receive_text()
-                player.statements[truth] = True
+
+            await player.websocket.send_text("Enter a truth:")
+            truth = await asyncio.gather(player.websocket.receive_text())
+            print(truth)
+            # player.statements[truth] = True
             # await player.websocket.send_text("Enter a lie:")
             # false = await player.websocket.receive_text()
             # player.statements[false] = False
-
 
     # def checkAnswer(self, statements, player, answer):
     #     if statements[answer] == False:
@@ -72,7 +72,8 @@ class Game:
     async def play(self, broadcast):
         while 2 <= len(self.players):
             self.newRound()
-            await self.askStatement()
+            # woot
+            await asyncio.gather(asyncio.to_thread(self.askStatement()),asyncio.sleep(1))
             # while len(self.playersGone) != len(self.players):
             #     choices = [x for x in self.players if x not in self.playersGone]
             #     asking = random.choice(choices)
