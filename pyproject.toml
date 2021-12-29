@@ -12,6 +12,7 @@ fastapi = "^0.70.1"
 asyncio = "^3.4.3"
 aioconsole = "^0.3.3"
 websockets = "^10.1"
+uvicorn = "^0.16.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
