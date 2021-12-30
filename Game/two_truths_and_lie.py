@@ -28,35 +28,46 @@ class Game:
         self.players = []
         self.playersGone=[]
 
-    async def addPlayer(self, websocket, broadcast):
+    async def addPlayer(self, websocket):
         await websocket.send_text("What is your name?")
         name = await websocket.receive_text()
         player = Player(name, websocket)
         self.players.append(player)
-
-        await self.play(broadcast)
-        print(player) 
-        
         print(f"Current players: {self.players}")
 
     def newRound(self):
         self.playersGone = []
         self.players = self.players + self.queue
+        
+    
 
     async def askStatement(self):
-        
+        tasks = []
         for player in self.players:
             await player.websocket.send_text("Enter 2 true facts and 1 lie")
-            player.statements= {}
-            for _ in range(0, 1):
-                await player.websocket.send_text("Enter a truth:")
-                truth = await player.websocket.receive_text()
-                player.statements[truth] = True
-            # await player.websocket.send_text("Enter a lie:")
-            # false = await player.websocket.receive_text()
-            # player.statements[false] = False
+            task = asyncio.ensure_future(self.ask(player))
+            tasks.append(task)
+
+        truths_and_lies = await asyncio.gather(*tasks, return_exceptions=True)
+        return
 
 
+  
+    @staticmethod
+    async def ask(player):
+        player.statements= {}
+        for _ in range(0, 1):
+            await player.websocket.send_text("Enter a truth:")
+            truth = await player.websocket.receive_text()
+            player.statements[truth] = True
+        await player.websocket.send_text("Enter a lie:")
+        false = await player.websocket.receive_text()
+        player.statements[false] = False
+        print(player.statements)
+        return player.statements
+
+
+# ----------------------------------------------------------------------------------
     # def checkAnswer(self, statements, player, answer):
     #     if statements[answer] == False:
     #         print(player.name + " ✓")
@@ -69,10 +80,12 @@ class Game:
                 self.players.remove(player)
         print(f"Current players: {self.players}")
     
-    async def play(self, broadcast):
+    async def play(self):
         while 2 <= len(self.players):
             self.newRound()
-            await self.askStatement()
+            # await self.ask(self.players[0])
+            asyncio.get_event_loop().run_until_complete(await self.askStatement())
+            
             # while len(self.playersGone) != len(self.players):
             #     choices = [x for x in self.players if x not in self.playersGone]
             #     asking = random.choice(choices)
@@ -90,16 +103,19 @@ class Game:
             #             print(player.name + f" guess {asking.name}'s lie by inputing the corresponding number:")
             #             answer = input("> ")
             #             self.checkAnswer(statementsDict, player, statements[int(answer)-1])
-            # t = 60
-            # print(f"Next round starting in {t} seconds")
-            # while t:
-            #     mins, secs = divmod(t, 60)
-            #     timer = '{:02d}:{:02d}'.format(mins, secs)
-            #     print(timer, end="\r")
-            #     time.sleep(1)
-            #     t -= 1
-            # print("New Round Starting...")
-            # self.play()
+            
+            t = 10
+            print(f"Next round starting in {t} seconds")
+            while t:
+                mins, secs = divmod(t, 60)
+                timer = '{:02d}:{:02d}'.format(mins, secs)
+                print(timer, end="\r")
+                time.sleep(1)
+                t -= 1
+                print("New Round Starting...")
+
+            
+        
         
 
 

@@ -28,24 +28,66 @@ class ConnectionManager:
             await connection.send_text(message)
 
 
-
+cache = []
 manager = ConnectionManager()
+played = []
+def function_word_smasher():
+    result = ""
+    for word in cache:
+        result += word
+    return result
+
+async def check_result(string, websocket,client_id):
+
+    if string[0] == "$":
+        word = string[1:]
+        return await websocket.send_text(word)
+
+    # if string[0] == "%":
+    #     if string[1:] == truth[0]:
+    #         websocket.send_
+    
+    if client_id in played:
+        await websocket.send_text("wait your turn you loser")
+    
+        
+    if client_id not in played:
+        played.append(client_id)
+        await say_hello(websocket)
+
+
+    # users_that_have_gone = []
+    #say % is used to mark the end of where the client id is in a string:
+    #if string before index of '%' is not in userers_that_have_gone:
+    #   Do some function
+    # Else:
+    #    Do nothing because user is in above list
+
+    if string[0] == "*":
+        return await say_hello(websocket)
+
+async def say_hello(websocket):
+    await websocket.send_text("Hello Word")
+
 
 @app.get("/test")
 async def get():
     return "Yo Dawg"
 
 
+
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: str):
-    await manager.connect(websocket)
-
-    try:
+    await manager.connect(websocket)    
+    try:     
+        await websocket.send_text("Give me a word")
         while True:
-            await game.addPlayer( websocket, manager.broadcast)
+          word = await websocket.receive_text()
+          await check_result(word,websocket,client_id)
+          
 
-           
-
+            
+            
     except WebSocketDisconnect:
         
         manager.disconnect(websocket)

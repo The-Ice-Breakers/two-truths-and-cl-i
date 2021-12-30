@@ -2,10 +2,12 @@ import asyncio
 from starlette.websockets import WebSocket
 from websockets import connect
 from aioconsole import ainput
+import uuid
 
 keep_alive = True
 
-name = input("Whats your name?\n")
+
+name = input("whats your name?")
 async def display_message(websocket):
     while keep_alive:
         rec = await websocket.recv()
