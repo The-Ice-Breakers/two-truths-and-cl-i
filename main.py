@@ -27,21 +27,21 @@ class ConnectionManager:
         for connection in self.active_connections:
             await connection.send_text(message)
 
-class GameManager:
-    def __init__(self):
-        self.players: List[Player] = []
+# class GameManager:
+#     def __init__(self):
+#         self.players: List[Player] = []
 
-    async def connect(self, player:Player):
-        await player.websocket.accept()
-        self.players.append(player)
+#     async def connect(self, player:Player):
+#         await player.websocket.accept()
+#         self.players.append(player)
 
-    def disconnect(self, websocket: WebSocket):
-        game.removePlayer(websocket)
-        self.active_connections.remove(websocket)
+#     def disconnect(self, websocket: WebSocket):
+#         game.removePlayer(websocket)
+#         self.active_connections.remove(websocket)
 
-    async def broadcast(self, message: str):
-        for connection in self.active_connections:
-            await connection.send_text(message)
+#     async def broadcast(self, message: str):
+#         for connection in self.active_connections:
+#             await connection.send_text(message)
 manager = ConnectionManager()
 
 @app.get("/test")
