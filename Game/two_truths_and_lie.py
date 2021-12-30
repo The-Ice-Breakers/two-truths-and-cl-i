@@ -34,24 +34,39 @@ class Game:
         player = Player(name, websocket)
         self.players.append(player)
 
-        await self.play(broadcast)
+        #await self.play(broadcast)
         print(player) 
         
         print(f"Current players: {self.players}")
+        await broadcast(f"{player.name} has joined the game")
+        return player
 
     def newRound(self):
         self.playersGone = []
         self.players = self.players + self.queue
 
-    async def askStatement(self):
-        
-        for player in self.players:
-            await player.websocket.send_text("Enter 2 true facts and 1 lie")
-            player.statements= {}
+    async def test_gather(self,player:Player):
+        await player.websocket.send_text("Enter 2 true facts and 1 lie")
+        player.statements= {}
+        await player.websocket.send_text("Enter a truth:")
+        truth = await player.websocket.receive_text()
+        await player.websocket.send_text("Enter a lie:")
+        false = await player.websocket.receive_text()
+        player.statements[false] = False
+        return [truth,false]
 
-            await player.websocket.send_text("Enter a truth:")
-            truth = await asyncio.gather(player.websocket.receive_text())
-            print(truth)
+    async def askStatement(self):
+        for player in self.players:
+            # await player.websocket.send_text("Enter 2 true facts and 1 lie")
+            # player.statements= {}
+            # await player.websocket.send_text("Enter a truth:")
+            # truth = await player.websocket.receive_text()
+            # print(truth)
+            
+            
+            answers = await asyncio.gather(self.test_gather(player))
+
+            print(answers)
             # player.statements[truth] = True
             # await player.websocket.send_text("Enter a lie:")
             # false = await player.websocket.receive_text()
@@ -73,7 +88,8 @@ class Game:
         while 2 <= len(self.players):
             self.newRound()
             # woot
-            await asyncio.gather(asyncio.to_thread(self.askStatement()),asyncio.sleep(1))
+            await asyncio.gather(self.askStatement())
+            #await asyncio.gather(asyncio.to_thread(self.askStatement()),asyncio.sleep(1))
             # while len(self.playersGone) != len(self.players):
             #     choices = [x for x in self.players if x not in self.playersGone]
             #     asking = random.choice(choices)
