@@ -32,4 +32,4 @@ async def gather(uri):
         )
 
 
-asyncio.run(gather(f"ws://localhost:8001/ws/{name}"))
+asyncio.run(gather(f"ws://test-for-truth.herokuapp.com/test"))
