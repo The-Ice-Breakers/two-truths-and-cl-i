@@ -152,6 +152,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
             await check_result(word,websocket,client_id)
             await start_round_call(client_id)
             await change_player_or_start_new_round(client_id)
+            print("cool")
 
 
 
