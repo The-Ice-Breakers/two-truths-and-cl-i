@@ -7,7 +7,7 @@ import uuid
 keep_alive = True
 
 
-name = input("whats your name?")
+name = input("whats your name? ")
 async def display_message(websocket):
     while keep_alive:
         rec = await websocket.recv()
