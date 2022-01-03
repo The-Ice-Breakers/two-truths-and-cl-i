@@ -21,6 +21,7 @@ class ConnectionManager:
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         self.active_connections.append(websocket)
+        print(self.active_connections)
 
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
@@ -54,6 +55,8 @@ async def check_result(string, websocket,client_id):
             cache.clear()
             await manager.broadcast("Cache has been cleared")
             return
+
+        if string[]
 
         if string[0] == "?":
             new_string = string[1:]
