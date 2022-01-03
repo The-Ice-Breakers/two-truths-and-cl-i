@@ -56,8 +56,6 @@ async def check_result(string, websocket,client_id):
             await manager.broadcast("Cache has been cleared")
             return
 
-        if string[]
-
         if string[0] == "?":
             new_string = string[1:]
             return await input_parser.help(websocket)
