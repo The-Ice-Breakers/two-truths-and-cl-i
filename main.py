@@ -50,6 +50,10 @@ def changeCurrent():
 
 async def check_result(string, websocket,client_id):
     try:
+        if string[0] == "#":
+            cache.clear()
+            await manager.broadcast("Cache has been cleared")
+            return
 
         if string[0] == "?":
             new_string = string[1:]
