@@ -48,8 +48,30 @@ def changeCurrent():
     global current_check
     current_check = cache.pop(0)
 
+def _remove_command_char(string):
+    '''
+    Input:
+    - Command String From User Input
+    Output:
+    - String with command character stripped off
+    '''
+    return string[1:]
 
-async def check_result(string, websocket,client_id):
+async def scoreplus(websocket,client_id):
+    await websocket.send_text("You guessed right")
+    scores[client_id] += 20
+    print(len(round_manager.input_counter))
+    await websocket.send_text(f"Your score: {scores[client_id]}")
+                            
+                                
+async def scoreminus(websocket,client_id):
+    await websocket.send_text("That was incorrect")
+    scores[client_id] -= 20
+    correct_list = list(current_check.keys())
+    await websocket.send_text(f"The correct answer was: {correct_list[2]}")
+    await websocket.send_text(f"Your score: {scores[client_id]}")
+
+async def check_result(string, websocket, client_id):
     try:
         if string[0] == "#":
             cache.clear()
@@ -57,15 +79,14 @@ async def check_result(string, websocket,client_id):
             return
 
         if string[0] == "?":
-            new_string = string[1:]
             return await input_parser.help(websocket)
 
         if string[0] == "2":
-            new_string = string[1:]
+            new_string = _remove_command_char(string)
             return await manager.broadcast(new_string)
 
         if string[0] == "@":
-            new_string = string[1:]
+            new_string = _remove_command_char(string)
             truth_and_lies = await input_parser.changeTL(websocket, new_string, client_id)
             if truth_and_lies:
                 cache.append(truth_and_lies)
@@ -96,24 +117,18 @@ async def check_result(string, websocket,client_id):
                 return await websocket.send_text("Not for you")
 
             if round_manager.check_has_finished(client_id):
-
                 round_manager.update_input_count(client_id)
+                
                 print(round_manager.input_counter)
+
                 if current_check:
-                    new_string = string[1:]
+                    new_string = _remove_command_char(string)
                     if new_string.isdigit() and 0 < int(new_string) < 4:
-            
                             if current_check[random_statement[int(new_string)-1]] is False:
-                                await websocket.send_text("You guessed right")
-                                scores[client_id] += 20
-                                print(len(round_manager.input_counter))
-                                await websocket.send_text(f"Your score: {scores[client_id]}")
-                            else: 
-                                await websocket.send_text("That was incorrect")
-                                scores[client_id] -= 20
-                                correct_list = list(current_check.keys())
-                                await websocket.send_text(f"The correct answer was: {correct_list[2]}")
-                                await websocket.send_text(f"Your score: {scores[client_id]}")
+                                await scoreplus(websocket,client_id)
+                            else:
+                                await scoreminus(websocket,client_id)
+                                
     
                     else:  
                         await websocket.send_text("That's unfortunate, you missed the 1,2,3 keys")          
@@ -157,7 +172,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
             await check_result(word,websocket,client_id)
             await start_round_call(client_id)
             await change_player_or_start_new_round(client_id)
-            print("cool")
+
 
 
 
