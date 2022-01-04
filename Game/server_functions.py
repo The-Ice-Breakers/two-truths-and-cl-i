@@ -67,10 +67,12 @@ class Parser:
 Commands:
 ? Help
 ! Guess
-@ Change truths and lie
 > Next
+$ Show scores
+2 Send text to everyone
+@ Change truths and lie
 Use this format: (truth, truth, lie)
-        """)
+""")
 
 
     @staticmethod
