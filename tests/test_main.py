@@ -18,17 +18,17 @@ class ConnectionManager:
     def __init__(self):
         self.active_connections: List[WebSocket] = []
 
-    async def connect(self, websocket: WebSocket):
-        await websocket.accept()
+    def connect(self, websocket: WebSocket):
+        websocket.accept()
         self.active_connections.append(websocket)
         print(self.active_connections)
 
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
 
-    async def broadcast(self, message: str):
+    def broadcast(self, message: str):
         for connection in self.active_connections:
-            await connection.send_text(message)
+            connection.send_text(message)
 
 
 cache = []
@@ -49,32 +49,32 @@ def changeCurrent():
     current_check = cache.pop(0)
 
 
-async def check_result(string, websocket,client_id):
+def check_result(string, websocket,client_id):
     try:
         if string[0] == "#":
             cache.clear()
-            await manager.broadcast("Cache has been cleared")
+            manager.broadcast("Cache has been cleared")
             return
 
         if string[0] == "?":
             new_string = string[1:]
-            return await input_parser.help(websocket)
+            return input_parser.help(websocket)
 
         if string[0] == "2":
             new_string = string[1:]
-            return await manager.broadcast(new_string)
+            return manager.broadcast(new_string)
 
         if string[0] == "@":
             new_string = string[1:]
-            truth_and_lies = await input_parser.changeTL(websocket, new_string, client_id)
+            truth_and_lies = input_parser.changeTL(websocket, new_string, client_id)
             if truth_and_lies:
                 cache.append(truth_and_lies)
             print(cache)
-            return
+            return truth_and_lies
 
         if string[0] == ">":
             if not cache:
-                await websocket.send_text("Nothing next")
+                return websocket.send_text("Nothing next")
             else:
                 round_manager.reset_input_count()
                 changeCurrent()
@@ -83,7 +83,7 @@ async def check_result(string, websocket,client_id):
                 global random_statement
                 random_statement = statement_order[0:3]
                 random.shuffle(random_statement)
-                await manager.broadcast(f"""
+                manager.broadcast(f"""
     Enter the corresponding number to what you think is the lie.
     1. {random_statement[0]}
     2. {random_statement[1]}
@@ -93,7 +93,7 @@ async def check_result(string, websocket,client_id):
 
         if string[0] == "!":
             if current_check["user"] is client_id:
-                return await websocket.send_text("Not for you")
+                return websocket.send_text("Not for you")
 
             if round_manager.check_has_finished(client_id):
 
@@ -104,59 +104,59 @@ async def check_result(string, websocket,client_id):
                     if new_string.isdigit() and 0 < int(new_string) < 4:
             
                             if current_check[random_statement[int(new_string)-1]] is False:
-                                await websocket.send_text("You guessed right")
+                                websocket.send_text("You guessed right")
                                 scores[client_id] += 20
                                 print(len(round_manager.input_counter))
-                                await websocket.send_text(f"Your score: {scores[client_id]}")
+                                websocket.send_text(f"Your score: {scores[client_id]}")
                             else: 
-                                await websocket.send_text("That was incorrect")
+                                websocket.send_text("That was incorrect")
                                 scores[client_id] -= 20
                                 correct_list = list(current_check.keys())
-                                await websocket.send_text(f"The correct answer was: {correct_list[2]}")
-                                await websocket.send_text(f"Your score: {scores[client_id]}")
+                                websocket.send_text(f"The correct answer was: {correct_list[2]}")
+                                websocket.send_text(f"Your score: {scores[client_id]}")
     
                     else:  
-                        await websocket.send_text("That's unfortunate, you missed the 1,2,3 keys")          
+                        websocket.send_text("That's unfortunate, you missed the 1,2,3 keys")          
             else:
-                await websocket.send_text("You have already guessed")     
+                websocket.send_text("You have already guessed")     
             if current_check is None:
-                await websocket.send_text("No guessing right now")
+                websocket.send_text("No guessing right now")
 
     except WebSocketDisconnect:
         
         manager.disconnect(websocket)
-        await manager.broadcast(f"Client #{client_id} left the chat")
+        manager.broadcast(f"Client #{client_id} left the chat")
 
-async def start_round_call(client_id):
+def start_round_call(client_id):
     if len(cache) == len(manager.active_connections):
-        await manager.broadcast(f"Everyone has sent in their statements {client_id} please press '>'")
+        manager.broadcast(f"Everyone has sent in their statments {client_id} please press '>'")
 
-async def change_player_or_start_new_round(client_id):   
+def change_player_or_start_new_round(client_id):   
     if len(round_manager.input_counter) == (len(manager.active_connections) - 1):
         if len(cache) == 0:
             round_manager.reset_input_count()
-            await manager.broadcast("Please send in your statements prefixed with '@'")
+            manager.broadcast("Please send in your statements prefixed with '@'")
         else:
-            await manager.broadcast(f"Everyone has guessed {client_id} please press '>' ")
+            manager.broadcast(f"Everyone has guessed {client_id} please press '>' ")
 
 
 @app.get("/test")
-async def get():
+def get():
     return "Yo Dawg"
 
 
 @app.websocket("/ws/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, client_id: str):
-    await manager.connect(websocket)    
+def websocket_endpoint(websocket: WebSocket, client_id: str):
+    manager.connect(websocket)    
     scores[client_id] = 0
     try:     
-        await websocket.send_text("""For help with commands enter "?" """)
-        await websocket.send_text("Please send in your statements prefixed with '@'")
+        websocket.send_text("""For help with commands enter "?" """)
+        websocket.send_text("Please send in your statements prefixed with '@'")
         while True:
-            word = await websocket.receive_text()
-            await check_result(word,websocket,client_id)
-            await start_round_call(client_id)
-            await change_player_or_start_new_round(client_id)
+            word = websocket.receive_text()
+            check_result(word,websocket,client_id)
+            start_round_call(client_id)
+            change_player_or_start_new_round(client_id)
             print("cool")
 
 
@@ -164,7 +164,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
     except WebSocketDisconnect:
         
         manager.disconnect(websocket)
-        await manager.broadcast(f"Client #{client_id} left the chat")
+        manager.broadcast(f"Client #{client_id} left the chat")
 
 import uvicorn
 
