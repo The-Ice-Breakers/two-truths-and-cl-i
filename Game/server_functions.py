@@ -67,10 +67,12 @@ class Parser:
 Commands:
 ? Help
 ! Guess
-@ Change truths and lie
 > Next
+$ Show scores
+2 Send text to everyone
+@ Change truths and lie
 Use this format: (truth, truth, lie)
-        """)
+""")
 
 
     @staticmethod
@@ -83,6 +85,20 @@ Use this format: (truth, truth, lie)
             return truths_lie_client
         else:
             await websocket.send_text("Invalid format: (truth, truth, lie)")
+
+    def parse_TL(string):
+        pattern = r"[^,\s][^\,]*[^,\s]*"
+        truths_and_lie = re.findall(pattern, string)
+        return truths_and_lie
+    
+    def validate_TL(parsed_TL):
+        if len(parsed_TL) == 3:
+            return True
+        return False
+    
+    def to_TL_dict(validated_TL,client_id):
+        TL_dict = {validated_TL[0]:True, validated_TL[1]:True, validated_TL[2]:False, "user": client_id}
+        return TL_dict
 
 
 
