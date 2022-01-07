@@ -99,7 +99,7 @@ Enter the corresponding number to what you think is the lie.
 Use "!" to guess
 """)
 
-async def handle_guess(string, websocket, client_id):
+async def handle_guess(string:str, websocket, client_id):
     if current_check["user"] is client_id:
         return await websocket.send_text("Not for you")
 
@@ -109,9 +109,11 @@ async def handle_guess(string, websocket, client_id):
         print(round_manager.input_counter)
 
         if current_check:
-            new_string = _remove_command_char(string)
-            if new_string.isdigit() and 0 < int(new_string) < 4:
-                    if current_check[random_statement[int(new_string)-1]] is False:
+            user_input = _remove_command_char(string)
+            if user_input.isdigit() and 1 <= int(user_input) <= 3:
+                    index_of_guess = int(user_input)-1
+                    statement_guessed = random_statement[index_of_guess]
+                    if current_check[statement_guessed] is False:
                         await scoreplus(websocket,client_id)
                     else:
                         await scoreminus(websocket,client_id)
@@ -144,7 +146,6 @@ async def check_result(string, websocket, client_id):
     try:
         # Clear user statements
         if string[0] == "#":
-            #statement_collection.clear()
             clear_statement_collection()
             await manager.broadcast("Cache has been cleared")
             return
