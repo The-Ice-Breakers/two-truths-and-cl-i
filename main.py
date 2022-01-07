@@ -121,6 +121,9 @@ async def handle_guess(string, websocket, client_id):
         await websocket.send_text("You have already guessed")     
     if current_check is None:
         await websocket.send_text("No guessing right now")
+
+def clear_statement_collection():
+    statement_collection.clear()
     
 
 async def scoreplus(websocket,client_id):
@@ -141,7 +144,8 @@ async def check_result(string, websocket, client_id):
     try:
         # Clear user statements
         if string[0] == "#":
-            statement_collection.clear()
+            #statement_collection.clear()
+            clear_statement_collection()
             await manager.broadcast("Cache has been cleared")
             return
 
