@@ -128,10 +128,15 @@ def clear_statement_collection():
     statement_collection.clear()
     
 
-async def scoreplus(websocket,client_id):
-    await websocket.send_text("You guessed right")
+def add_to_score(client_id):
     scores[client_id] += 20
     print(len(round_manager.input_counter))
+
+async def scoreplus(websocket,client_id):
+    await websocket.send_text("You guessed right")
+    # scores[client_id] += 20
+    # print(len(round_manager.input_counter))
+    add_to_score(client_id)
     await websocket.send_text(f"Your score: {scores[client_id]}")
                             
                                 
