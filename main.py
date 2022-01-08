@@ -133,6 +133,11 @@ def add_to_score(client_id):
     print(len(round_manager.input_counter))
 
 async def scoreplus(websocket,client_id):
+    """
+    Notifies client:
+    - that their response was correct
+    - their updated score
+    """
     await websocket.send_text("You guessed right")
     add_to_score(client_id)
     await websocket.send_text(f"Your score: {scores[client_id]}")
@@ -156,7 +161,7 @@ async def scoreminus(websocket,client_id):
     Notifies client:
     - that their response was incorrect
     - what the correct response was
-    - their current score
+    - their updated score
     """
     await websocket.send_text("That was incorrect")
     subtract_from_score(client_id)
