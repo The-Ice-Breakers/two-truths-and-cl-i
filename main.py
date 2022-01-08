@@ -134,17 +134,27 @@ def add_to_score(client_id):
 
 async def scoreplus(websocket,client_id):
     await websocket.send_text("You guessed right")
-    # scores[client_id] += 20
-    # print(len(round_manager.input_counter))
     add_to_score(client_id)
     await websocket.send_text(f"Your score: {scores[client_id]}")
                             
                                 
+def subtract_from_score(client_id):
+    """
+    Subtracts 20 points from given player
+    """
+    scores[client_id] -= 20
+
+def get_correct_statement():
+    """
+    Returns correct statement from current TL_Dict in current check
+    """
+    correct_statement = list(current_check.keys())[2]
+    return correct_statement
+
 async def scoreminus(websocket,client_id):
     await websocket.send_text("That was incorrect")
-    scores[client_id] -= 20
-    correct_list = list(current_check.keys())
-    await websocket.send_text(f"The correct answer was: {correct_list[2]}")
+    subtract_from_score(client_id)
+    await websocket.send_text(f"The correct answer was: {get_correct_statement()}")
     await websocket.send_text(f"Your score: {scores[client_id]}")
 
 async def check_result(string, websocket, client_id):
