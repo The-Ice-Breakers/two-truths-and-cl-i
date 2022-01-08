@@ -54,7 +54,7 @@ def changeCurrent():
     global current_check
     current_check = statement_collection.pop(0)
 
-def _remove_command_char(string):
+def _remove_command_char(string:str) -> str:
     '''
     Input:
     - Command String From User Input
@@ -100,10 +100,18 @@ Use "!" to guess
 """)
 
 def is_valid_guess(user_input:str) -> None:
+    """
+    Ensures that user's guess is a number between 1 and 3\n
+    Raises ValueError otherwise
+    """
     if not (user_input.isdigit() and 1 <= int(user_input) <= 3):
         raise ValueError('User\'s guess must be between 1 and 3')
 
 def is_correct_guess(user_input:str) -> bool:
+    """
+    Checks if user's guess is the correct one
+    - returns bool
+    """
     index_of_guess = int(user_input) - 1
     statement_guessed = random_statement[index_of_guess]
     if current_check[statement_guessed] is False:
