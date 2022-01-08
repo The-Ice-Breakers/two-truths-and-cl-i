@@ -120,8 +120,10 @@ def is_correct_guess(user_input:str) -> bool:
         return False
 
 async def user_can_guess(websocket, client_id):
-    print('in user_can_guess')
-    # Move this to bottom if this is causing problems
+    """
+    Checks if user is able to guess on a statement\n
+    If they can't, broadcasts the reason they are unable to guess on a statement
+    """
     if current_check is None:
         print('is None')
         await websocket.send_text("No guessing right now")
@@ -146,31 +148,21 @@ async def user_can_guess(websocket, client_id):
 
 
 async def handle_guess(string:str, websocket, client_id):
-    # if current_check["user"] is client_id:
-    #     return await websocket.send_text("Not for you")
-
-    # if round_manager.check_has_finished(client_id):
-    #     round_manager.update_input_count(client_id)
-        
-    #     print(round_manager.input_counter)
-
-        #if current_check:
-        if await user_can_guess(websocket,client_id):
-            user_input = _remove_command_char(string)
-            increase_score = False
-            try:
-                is_valid_guess(user_input)
-                increase_score = is_correct_guess(user_input)
-            except ValueError:
-                await websocket.send_text("That's unfortunate, you missed the 1,2,3 keys")
-            if increase_score:
-                await scoreplus(websocket,client_id)
-            else:
-                await scoreminus(websocket,client_id)      
-    # else:
-    #     await websocket.send_text("You have already guessed")     
-    # if current_check is None:
-    #     await websocket.send_text("No guessing right now")
+    """
+    Main function for handling user guesses
+    """
+    if await user_can_guess(websocket,client_id):
+        user_input = _remove_command_char(string)
+        increase_score = False
+        try:
+            is_valid_guess(user_input)
+            increase_score = is_correct_guess(user_input)
+        except ValueError:
+            await websocket.send_text("That's unfortunate, you missed the 1,2,3 keys")
+        if increase_score:
+            await scoreplus(websocket,client_id)
+        else:
+            await scoreminus(websocket,client_id)      
 
 def clear_statement_collection():
     """
