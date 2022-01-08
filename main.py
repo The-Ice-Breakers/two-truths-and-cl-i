@@ -152,6 +152,12 @@ def get_correct_statement():
     return correct_statement
 
 async def scoreminus(websocket,client_id):
+    """
+    Notifies client:
+    - that their response was incorrect
+    - what the correct response was
+    - their current score
+    """
     await websocket.send_text("That was incorrect")
     subtract_from_score(client_id)
     await websocket.send_text(f"The correct answer was: {get_correct_statement()}")
