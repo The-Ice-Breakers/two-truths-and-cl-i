@@ -99,6 +99,20 @@ Enter the corresponding number to what you think is the lie.
 Use "!" to guess
 """)
 
+def is_valid_guess(user_input:str) -> None:
+    if not (user_input.isdigit() and 1 <= int(user_input) <= 3):
+        raise ValueError('User\'s guess must be between 1 and 3')
+
+def is_correct_guess(user_input:str) -> bool:
+    index_of_guess = int(user_input) - 1
+    statement_guessed = random_statement[index_of_guess]
+    if current_check[statement_guessed] is False:
+        return True
+    else:
+        return
+
+
+
 async def handle_guess(string:str, websocket, client_id):
     if current_check["user"] is client_id:
         return await websocket.send_text("Not for you")
@@ -110,15 +124,26 @@ async def handle_guess(string:str, websocket, client_id):
 
         if current_check:
             user_input = _remove_command_char(string)
-            if user_input.isdigit() and 1 <= int(user_input) <= 3:
-                    index_of_guess = int(user_input)-1
-                    statement_guessed = random_statement[index_of_guess]
-                    if current_check[statement_guessed] is False:
-                        await scoreplus(websocket,client_id)
-                    else:
-                        await scoreminus(websocket,client_id)
-            else:  
-                await websocket.send_text("That's unfortunate, you missed the 1,2,3 keys")          
+            increase_score = False
+            try:
+                is_valid_guess(user_input)
+            # #if user_input.isdigit() and 1 <= int(user_input) <= 3:
+            #     index_of_guess = int(user_input)-1
+            #     statement_guessed = random_statement[index_of_guess]
+                #if current_check[statement_guessed] is False:
+                increase_score = is_correct_guess(user_input)
+                # if increase_score:
+                #     await scoreplus(websocket,client_id)
+                # else:
+                #     await scoreminus(websocket,client_id)
+            # else:
+            except ValueError:
+                await websocket.send_text("That's unfortunate, you missed the 1,2,3 keys")
+                #await scoreminus(websocket,client_id)
+            if increase_score:
+                await scoreplus(websocket,client_id)
+            else:
+                await scoreminus(websocket,client_id)      
     else:
         await websocket.send_text("You have already guessed")     
     if current_check is None:
