@@ -109,7 +109,7 @@ def is_correct_guess(user_input:str) -> bool:
     if current_check[statement_guessed] is False:
         return True
     else:
-        return
+        return False
 
 
 
@@ -127,19 +127,9 @@ async def handle_guess(string:str, websocket, client_id):
             increase_score = False
             try:
                 is_valid_guess(user_input)
-            # #if user_input.isdigit() and 1 <= int(user_input) <= 3:
-            #     index_of_guess = int(user_input)-1
-            #     statement_guessed = random_statement[index_of_guess]
-                #if current_check[statement_guessed] is False:
                 increase_score = is_correct_guess(user_input)
-                # if increase_score:
-                #     await scoreplus(websocket,client_id)
-                # else:
-                #     await scoreminus(websocket,client_id)
-            # else:
             except ValueError:
                 await websocket.send_text("That's unfortunate, you missed the 1,2,3 keys")
-                #await scoreminus(websocket,client_id)
             if increase_score:
                 await scoreplus(websocket,client_id)
             else:
