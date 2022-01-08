@@ -125,10 +125,16 @@ async def handle_guess(string:str, websocket, client_id):
         await websocket.send_text("No guessing right now")
 
 def clear_statement_collection():
+    """
+    Clears global statement_collection, effectively sending game back into collecting statements state
+    """
     statement_collection.clear()
     
 
 def add_to_score(client_id):
+    """
+    Adds 20 points to the given player's score
+    """
     scores[client_id] += 20
     print(len(round_manager.input_counter))
 
@@ -145,7 +151,7 @@ async def scoreplus(websocket,client_id):
                                 
 def subtract_from_score(client_id):
     """
-    Subtracts 20 points from given player
+    Subtracts 20 points from given player's score
     """
     scores[client_id] -= 20
 
