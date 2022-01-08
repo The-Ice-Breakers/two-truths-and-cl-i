@@ -119,18 +119,43 @@ def is_correct_guess(user_input:str) -> bool:
     else:
         return False
 
+async def user_can_guess(websocket, client_id):
+    print('in user_can_guess')
+    # Move this to bottom if this is causing problems
+    if current_check is None:
+        print('is None')
+        await websocket.send_text("No guessing right now")
+        return False
+
+    if current_check["user"] is client_id:
+        print('USER')
+        await websocket.send_text("Not for you")
+        return False
+
+    if round_manager.check_has_finished(client_id):
+        print('HAS FINISHED')
+        round_manager.update_input_count(client_id)
+        print(round_manager.input_counter)
+        return True
+    
+    else:
+        await websocket.send_text("You have already guessed")
+        return False
+    
+
 
 
 async def handle_guess(string:str, websocket, client_id):
-    if current_check["user"] is client_id:
-        return await websocket.send_text("Not for you")
+    # if current_check["user"] is client_id:
+    #     return await websocket.send_text("Not for you")
 
-    if round_manager.check_has_finished(client_id):
-        round_manager.update_input_count(client_id)
+    # if round_manager.check_has_finished(client_id):
+    #     round_manager.update_input_count(client_id)
         
-        print(round_manager.input_counter)
+    #     print(round_manager.input_counter)
 
-        if current_check:
+        #if current_check:
+        if await user_can_guess(websocket,client_id):
             user_input = _remove_command_char(string)
             increase_score = False
             try:
@@ -142,10 +167,10 @@ async def handle_guess(string:str, websocket, client_id):
                 await scoreplus(websocket,client_id)
             else:
                 await scoreminus(websocket,client_id)      
-    else:
-        await websocket.send_text("You have already guessed")     
-    if current_check is None:
-        await websocket.send_text("No guessing right now")
+    # else:
+    #     await websocket.send_text("You have already guessed")     
+    # if current_check is None:
+    #     await websocket.send_text("No guessing right now")
 
 def clear_statement_collection():
     """
